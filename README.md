@@ -63,7 +63,7 @@ subscription-manager repos \
 # INSTALLING OPENSHIFT
 1. Install required installation tools at _bastion_ node
 ```
-$ yum -y install atomic-openshift-utils atomic-openshift-clients
+$ yum -y install atomic-openshift-clients openshift-ansible
 ```
 
 2. Copy the OpenShift Ansible _inventory_ file to the _bastion_ node. Either using the _bastion_ Ansible host file or maintaining a local _inventory_file_
