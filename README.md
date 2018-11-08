@@ -6,6 +6,10 @@ To customize the inventory file to your environment you may reference the offici
 https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html
 
 
+# LAB CONCEPTUAL DIAGRAM
+
+![Diagram](images/openshift_ocs_converged_mode_small.png)
+
 # HOST PREPARATION
 
 ***NOTE:*** This is only a summary. For detailed information visit:

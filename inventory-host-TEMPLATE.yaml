@@ -312,13 +312,14 @@ master3.example.com openshift_node_group_name='node-config-master' openshift_nod
 ## These are infranodes
 infranode1.example.com openshift_node_group_name='node-config-infra' openshift_node_problem_detector_install=true
 infranode2.example.com openshift_node_group_name='node-config-infra' openshift_node_problem_detector_install=true
+infranode3.example.com openshift_node_group_name='node-config-infra' openshift_node_problem_detector_install=true
 
-## These are regular applicatoin nodes
+## These are regular App nodes
 node1.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
 node2.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
 node3.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
 
-## These are OCS nodes
+## These are regular App nodes with OCS hyperconverged
 ocs-node1.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
 ocs-node2.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
 ocs-node3.example.com openshift_node_group_name='node-config-compute' openshift_node_problem_detector_install=true
