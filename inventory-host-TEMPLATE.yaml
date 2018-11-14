@@ -291,7 +291,7 @@ nodes
 glusterfs
 
 [lb]
-openshift-console.example.com
+lb1.example.com
 
 [masters]
 master1.example.com
