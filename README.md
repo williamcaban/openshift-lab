@@ -10,6 +10,12 @@ https://docs.openshift.com/container-platform/3.11/install/configuring_inventory
 
 ![Diagram](images/openshift_ocs_converged_mode_small.png)
 
+# ENVIRONMENT REQUIREMENTS
+1. Ensure DNS resolution of all nodes FQDN
+2. Register the FQDN for the cluster consoles like osp-console.example.com (``openshift_master_cluster_hostname``)
+3. Register the wildcard subdomain for the apps like *.apps.example.com (``openshift_master_default_subdomain``)
+4. Ensure SELinux in ``enforcing`` mode
+
 # HOST PREPARATION
 
 ***NOTE:*** This is only a summary. For detailed information visit:
@@ -118,6 +124,21 @@ ansible-playbook -i inventory_file /usr/share/ansible/openshift-ansible/playbook
 # Remove left over config and certs from master and nodes
 ansible -i inventory_file nodes -a "rm -rf /etc/origin"
 ```
+# UNINSTALLING RHOCS
+```
+# Uninstall OCS
+ansible-playbook -i <path_to_inventory_file> /usr/share/ansible/openshift-ansible/playbooks/openshift-glusterfs/uninstall.yml
+
+# Uninstall OCS deleting data
+ansible-playbook -i <path_to_inventory_file> -e "openshift_storage_glusterfs_wipe=true" /usr/share/ansible/openshift-ansible/playbooks/openshift-glusterfs/uninstall.yml
+
+# Cleaning OCS leftovers
+ansible -i inventory_file glusterfs -a "rm -rf /var/lib/heketi /etc/glusterfs  /var/lib/glusterd /var/log/glusterfs"
+
+# Clean partitions of OCS target disks
+ansible -i inventory_file glusterfs -a "wipefs -a -f /dev/<path_to_disks>"
+
+```
 
 # TESTING THE OPENSHIFT INSTALLATION
 ## Setting up _bastion_ node for ``system:admin`` access
@@ -150,5 +171,20 @@ Login into the web console by accessing the name indicated in the ``openshift_ma
 
 Try some demo applications to test the environment.
 
-I have some simple demo activities here:
-https://github.com/williamcaban/podcool-docs
+I have some simple demo activities here: https://github.com/williamcaban/podcool-docs
+
+# Custom Certificates
+
+Deploying custom certificates are not part of this lab documentation. If need to use custom certificates refer to the following documentation
+
+- Configuring Custom Certificates
+
+  https://docs.openshift.com/container-platform/3.11/install_config/certificate_customization.html
+
+- Redeploying Certificates
+
+  https://docs.openshift.com/container-platform/3.11/install_config/redeploying_certificates.html
+
+- To deploy OpenShift named certificates
+
+  https://gist.github.com/abutcher/2e13e963a6c241cc5e90
