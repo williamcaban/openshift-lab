@@ -1,5 +1,5 @@
 #
-# ansible inventory for OpenShift Container Platform  3.11.59
+# ansible inventory for OpenShift Container Platform  3.11.69
 #
 
 # Configuring your inventory file
@@ -11,20 +11,20 @@
 ### Ansible Vars
 ###########################################################################
 timeout=60
-ansible_user=<admin-user>
+ansible_user=CHANGE_ME_ANSIBLE_SSH_USER
 ansible_become=yes
 
 ###########################################################################
 ### OpenShift Basic Vars
 ###########################################################################
-
+# Deployment type
 openshift_deployment_type=openshift-enterprise
 
 # WARNING: only disable these checks in LAB/TEST environments
 openshift_disable_check="disk_availability,memory_availability,docker_image_availability"
 
 # OpenShift Version:
-openshift_release=3.11.59
+openshift_release=3.11.69
 
 # Node Groups
 openshift_node_groups=[{'name': 'node-config-master', 'labels': ['node-role.kubernetes.io/master=true','runtime=docker']}, {'name': 'node-config-infra', 'labels': ['node-role.kubernetes.io/infra=true','runtime=docker']}, {'name': 'node-config-glusterfs', 'labels': ['runtime=docker']}, {'name': 'node-config-compute', 'labels': ['node-role.kubernetes.io/compute=true','runtime=docker'], 'edits': [{ 'key': 'kubeletArguments.pods-per-core','value': ['20']}]}]
@@ -36,14 +36,14 @@ logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n
 # Deploy Operator Lifecycle Manager (Tech Preview)
 openshift_enable_olm=true
 
-
 ###########################################################################
 ### OpenShift Registries Locations
 ###########################################################################
-# OLD oreg. Prior to 3.11
+
+# OLD oreg. Prior to 3.11 -- DO NOT USE WITH 3.11.x
 #oreg_url=registry.access.redhat.com/openshift3/ose-${component}:${version}
 
-# Need credentials from: https://access.redhat.com/term-based-registry/
+# NOTE: Need credentials from: https://access.redhat.com/term-based-registry/
 oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
 oreg_auth_user=CHANGE_ME_REGISTRY_SERVICE_ACCOUNT
 oreg_auth_password=CHANGE_ME_SERVICE_KEY
@@ -51,6 +51,7 @@ oreg_auth_password=CHANGE_ME_SERVICE_KEY
 # For Operator Framework Images
 openshift_additional_registry_credentials=[{'host':'registry.connect.redhat.com','user':'HANGE_ME_REGISTRY_SERVICE_ACCOUNT','password':'CHANGE_ME_SERVICE_KEY','test_image':'mongodb/enterprise-operator:0.3.2'}]
 
+# Update examples to point to oreg_url
 openshift_examples_modify_imagestreams=false
 
 # NOTE: accept insecure registries and registries with self-signed certs
@@ -66,6 +67,8 @@ openshift_master_dynamic_provisioning_enabled=true
 #
 # Enable Glusterfs Storageclass
 #
+
+# default namespace = glusterfs
 openshift_storage_glusterfs_namespace=openshift-storage
 openshift_storage_glusterfs_storageclass=true
 openshift_storage_glusterfs_storageclass_default=true
@@ -73,13 +76,13 @@ openshift_storage_glusterfs_storageclass_default=true
 #
 # Enable Glusterfs Block Storageclass
 #
-openshift_storage_glusterfs_block_deploy=true
-openshift_storage_glusterfs_block_host_vol_create=true
+openshift_storage_glusterfs_block_deploy=false
+#openshift_storage_glusterfs_block_host_vol_create=true
 # NOTE: host_vol_size is effectively an upper limit on the size of glusterblock volumes 
 # unless you manually create larger GlusterFS block-hosting volumes
-openshift_storage_glusterfs_block_host_vol_size=200
-openshift_storage_glusterfs_block_storageclass=true
-openshift_storage_glusterfs_block_storageclass_default=false
+#openshift_storage_glusterfs_block_host_vol_size=200
+#openshift_storage_glusterfs_block_storageclass=true
+#openshift_storage_glusterfs_block_storageclass_default=false
 
 #
 # Enable Glusterfs S3 (Tech Preview)
@@ -180,7 +183,7 @@ openshift_cluster_monitoring_operator_prometheus_storage_enabled=True
 openshift_cluster_monitoring_operator_alertmanager_storage_enabled=True
 
 # The next two are enabled in 3.11.z
-# When not specified, Prometheus will use deafult storage class
+# When not specified, Prometheus will use "deafult" storage class
 #openshift_cluster_monitoring_operator_prometheus_storage_class_name='glusterfs-storage-block'
 #openshift_cluster_monitoring_operator_alertmanager_storage_class_name='glusterfs-storage-block'
 
@@ -193,11 +196,13 @@ openshift_metrics_install_metrics=True
 
 # Usign Glusterfs or glusterfs-block
 openshift_metrics_cassandra_storage_type=dynamic
-# openshift_metrics_cassandra_pvc_storage_class_name='glusterfs-storage-block'
+# If not specified will use "default" storage class
+#openshift_metrics_cassandra_pvc_storage_class_name='glusterfs-storage-block'
 
 openshift_metrics_hawkular_nodeselector={"node-role.kubernetes.io/infra": "true"}
 openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/infra": "true"}
 openshift_metrics_heapster_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
 # Store Metrics for 2 days
 openshift_metrics_duration=2
 
@@ -221,7 +226,7 @@ openshift_grafana_node_selector={"node-role.kubernetes.io/infra":"true"}
 openshift_grafana_storage_type=pvc
 openshift_grafana_pvc_size=2Gi
 openshift_grafana_node_exporter=true
-openshift_grafana_sc_name=glusterfs-storage
+#openshift_grafana_sc_name=glusterfs-storage
 
 ########################
 # Cluster Logging
@@ -280,6 +285,15 @@ openshift_template_service_broker_namespaces=['openshift']
 # default=true
 ansible_service_broker_install=true
 ansible_service_broker_local_registry_whitelist=['.*-apb$']
+
+
+###########################################################################
+### OpenShift Cockpit Vars and plugins
+###########################################################################
+
+# Enable cockpit
+#osm_use_cockpit=true
+#osm_cockpit_plugins=['cockpit-kubernetes']
 
 ###########################################################################
 ### OpenShift Hosts
