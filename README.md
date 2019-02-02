@@ -126,7 +126,7 @@ ansible nodes -i inventory_file -m file -a "dest=/etc/origin state=absent"
 ansible nodes -i inventory_file -m file -a "dest=/etc/cni state=absent"
 ```
 
-## (optional) Reset `iptables` config afetr CNI failed installations
+## (optional) Reset `iptables` config after CNI failed installations
 Under certain installation failure scenarios (specially with network plugins) there might be some `iptables` entries left behind. To reset these you should have a clean iptables backup. The following is a sample `iptables.plain` from VMs running in a RHV environment: 
 
 ```
