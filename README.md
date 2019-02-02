@@ -121,9 +121,39 @@ NOTE: If the initial installation fails you need to uninstall OpenShift and star
 # Uninstall OpenShift
 ansible-playbook -i inventory_file /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
 
-# Remove left over config and certs from master and nodes
-ansible -i inventory_file nodes -a "rm -rf /etc/origin"
+# Remove leftover configs and certs from master and nodes
+ansible nodes -i inventory_file -m file -a "dest=/etc/origin state=absent"
+ansible nodes -i inventory_file -m file -a "dest=/etc/cni state=absent"
 ```
+
+## Reset `iptables` config to reset certain failed installations
+Under certain installation failure scenarios (specially with network plugins) there might be some `iptables` entries left behind. To reset these you should have a clean iptables backup. The following is a sample `iptables.plain` from VMs running in a RHV environment: 
+
+```
+# filename: iptables.plain
+# sample configuration for iptables service
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p udp -m multiport --dports 60001:60005 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+```
+
+To restore this `iptables` config to all the nodes use:
+```
+ansible nodes -i inventory_file -m copy -a "src=./iptables.plain dest=/etc/sysconfig/iptables"
+```
+
+Restart `iptables` service. Some CNI plugin installation failures might require a `reboot` of the node.
+
+
 # UNINSTALLING RHOCS
 ```
 # Uninstall OCS
