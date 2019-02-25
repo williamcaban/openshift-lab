@@ -43,7 +43,7 @@ openshift_enable_olm=true
 # OLD oreg. Prior to 3.11 -- DO NOT USE WITH 3.11.x
 #oreg_url=registry.access.redhat.com/openshift3/ose-${component}:${version}
 
-# NOTE: Need credentials from: https://access.redhat.com/term-based-registry/
+# NOTE: Need credentials from: https://access.redhat.com/terms-based-registry/
 oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
 oreg_auth_user=CHANGE_ME_REGISTRY_SERVICE_ACCOUNT
 oreg_auth_password=CHANGE_ME_SERVICE_KEY
