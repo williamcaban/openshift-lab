@@ -75,6 +75,15 @@ subscription-manager repos \
     --enable="rhel-7-server-ansible-2.6-rpms"
 ```
 
+4. Make sure the systems have the latest patches
+```
+# Update RHEL
+yum -y update
+
+# Reboot with updated Kernel
+reboot
+```
+
 # INSTALLING OPENSHIFT
 1. Install required installation tools at _bastion_ node
 ```
