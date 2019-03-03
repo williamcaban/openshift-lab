@@ -1,5 +1,5 @@
 # ABOUT THIS REPO
-This repository is a prescriptive OpenShift _inventory_ file I use for my lab environment and some notes on the installation process. The inventory file is verbose to allow for quick adjustment during tests. 
+This repository is a **prescriptive** OpenShift _inventory_ file I use for my lab environment and some notes on the installation process. The inventory file is verbose to allow for quick adjustment during tests. 
 
 To customize the inventory file to your environment you may reference the official OpenShift documentation:
 
@@ -10,6 +10,9 @@ https://docs.openshift.com/container-platform/3.11/install/configuring_inventory
 
 ![Diagram](images/openshift_ocs_converged_mode_small.png)
 
+
+- The [LB] represents a dedicated RHEL minimal server OpenShift can configure to serve as the load balancer for the Master Nodes. In a production environment this may be replaced by load balancer configured in passthrough mode.
+
 # ENVIRONMENT REQUIREMENTS
 1. Ensure DNS resolution of all nodes FQDN
 2. Register the FQDN for the cluster consoles like osp-console.example.com (``openshift_master_cluster_hostname``)
@@ -18,8 +21,10 @@ https://docs.openshift.com/container-platform/3.11/install/configuring_inventory
 
 # HOST PREPARATION
 
-***NOTE:*** This is only a summary. For detailed information visit:
+***NOTE 1:*** This is only a summary. For detailed information visit:
 https://docs.openshift.com/container-platform/latest/install/host_preparation.html
+
+***NOTE 2:*** The following instructions assume the use of a _bastion_ node to deploy OpenShift
 
 1. Ensure _bastion_ node has ssh access to all nodes
 ```
@@ -76,7 +81,9 @@ subscription-manager repos \
 $ yum -y install atomic-openshift-clients openshift-ansible
 ```
 
-2. Copy the OpenShift Ansible _inventory_ file to the _bastion_ node. Either using the _bastion_ Ansible host file or maintaining a local _inventory_file_
+2. Prepare your custom _inventory_ file. (See reference [template](inventory-host-TEMPLATE.yaml) in this repo)
+   
+3. Copy your OpenShift Ansible _inventory_ file to the _bastion_ node. Either using the _bastion_ Ansible host file or maintaining a local _inventory_file_
 ```
 /etc/ansible/hosts
 
@@ -89,13 +96,13 @@ _or_
 - Inventory configuration details: https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html
 
 
-3. Validate _bastion_ can reach all the nodes 
+4. Validate _bastion_ can reach all the nodes 
 
 ```
 ansible all -i inventory_file -m ping
 ```
 
-4. From _bastion_ node run the installation of prerequisites (base packages & Docker) on all OpenShift nodes
+5. From _bastion_ node run the installation of prerequisites (base packages & Docker) on all OpenShift nodes
 
  ```
 ansible-playbook -f 20 -i inventory_file /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml
@@ -105,7 +112,7 @@ ansible-playbook -f 20 -i inventory_file /usr/share/ansible/openshift-ansible/pl
 
 ***NOTE***: The ``-i <inventory_file>`` flag is not needed if using the default inventory path ``/etc/ansible/hosts``
 
-5. Once the previous step is completed ***WITHOUT*** any error, you may proceed with the deployment.
+6. Once the previous step is completed ***WITHOUT*** any error, you may proceed with the deployment.
 
     Deploy OpenShift using the ``ansilbe-playbook``
 
@@ -127,7 +134,9 @@ ansible nodes -i inventory_file -m file -a "dest=/etc/cni state=absent"
 ```
 
 ## (optional) Reset `iptables` config after CNI failed installations
-Under certain installation failure scenarios (specially with network plugins) there might be some `iptables` entries left behind. To reset these you should have a clean iptables backup. The following is a sample `iptables.plain` from VMs running in a RHV environment: 
+Under certain installation failure scenarios (specially with network plugins) there might be some `iptables` entries left behind. To reset these you should have a clean iptables backup. 
+
+***NOTE:*** The following is a sample `iptables.plain` from VMs running in a *RHV* environment: 
 
 ```
 # filename: iptables.plain
