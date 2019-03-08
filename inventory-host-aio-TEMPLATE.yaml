@@ -50,10 +50,6 @@ openshift_disable_check="disk_availability,memory_availability"
 # OpenShift Version(Always use sub-release for smoother upgrades):
 openshift_release=3.11.82
 
-# Configure logrotate scripts
-# See: https://github.com/nickhammond/ansible-logrotate
-#logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7","size 500M", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
-
 # Deploy Operator Lifecycle Manager (Tech Preview)
 openshift_enable_olm=true
 
@@ -244,8 +240,6 @@ openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra": "true"}
 
 # NOTE: Qty should NOT exceed the number of infra nodes
 openshift_hosted_router_replicas=1
-
-# openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
 
 openshift_hosted_registry_replicas=1
 openshift_hosted_registry_pullthrough=true
