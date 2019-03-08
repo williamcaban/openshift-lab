@@ -1,0 +1,310 @@
+#
+# ansible inventory for OpenShift Container Platform  3.11.82
+#
+
+###########################################################################
+#
+# DISCLAIMER: THIS ALL-IN-ONE DEPLOYMENT IS AN UNSUPPORTED DEPLOYMENT
+#             USING NFS AS STORAGE BACKEND FOR INFRASTRUCTURE COMPONETNS
+#
+###########################################################################
+#
+## All-in-One (AIO) SERVER WITH EMBEDDED NFS:
+# - assume AIO node name:       ocp.example.com
+# - assume app wildcard name:   *.apps.ocp.example.com
+# - assume NFS server configure to export /srv/nfs
+# - using docker or CRI-O
+#
+## If using dnsmasq as the DNS for the lab, the entry will be:
+# $ cat /etc/dnsmasq.d/ocp.example.com.conf
+# address=/ocp.example.com/192.168.1.30
+#
+# Where the IP is the IP of your RHEL AIO server. This entry will also
+# resolve anything *.ocp.example.com to the same IP address.
+#
+## NOTE 2: Some services have been set to use *ephemeral* storage
+#
+###########################################################################
+# Configuring your inventory file
+# https://docs.openshift.com/container-platform/3.11/install/configuring_inventory_file.html
+
+[OSEv3:vars]
+
+###########################################################################
+### Ansible Vars
+###########################################################################
+timeout=60
+ansible_user=root
+#ansible_become=yes
+
+###########################################################################
+### OpenShift Basic Vars
+###########################################################################
+# Deployment type
+openshift_deployment_type=openshift-enterprise
+#openshift_deployment_type=origin
+
+# WARNING: only disable these checks in LAB/TEST environments(Do not use in production)
+openshift_disable_check="disk_availability,memory_availability"
+
+# OpenShift Version(Always use sub-release for smoother upgrades):
+openshift_release=3.11.82
+
+# Configure logrotate scripts
+# See: https://github.com/nickhammond/ansible-logrotate
+#logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7","size 500M", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
+
+# Deploy Operator Lifecycle Manager (Tech Preview)
+openshift_enable_olm=true
+
+# Enable NFS support for infrastructure components (unsupported)
+openshift_enable_unsupported_configurations=true
+
+###########################################################################
+### Enable CRI-O
+###########################################################################
+
+#openshift_use_crio=True
+#openshift_use_crio_only=False
+#openshift_crio_enable_docker_gc=True
+
+###########################################################################
+### OpenShift Registries Locations
+###########################################################################
+
+# NOTE: Need credentials from: https://access.redhat.com/terms-based-registry/
+oreg_url=registry.redhat.io/openshift3/ose-${component}:${version}
+oreg_auth_user={{REGISTY_USER}}
+oreg_auth_password={{REGISTRY_TOKEN}}
+
+# For Operator Framework Images
+openshift_additional_registry_credentials=[{'host':'registry.connect.redhat.com','user':'{{REGISTY_USER}}','password':'{{REGISTRY_TOKEN}}','test_image':'mongodb/enterprise-operator:0.3.2'}]
+
+# Update examples to point to oreg_url
+# NOTE: change this if using disconnected install
+openshift_examples_modify_imagestreams=false
+
+# NOTE: accept insecure registries and registries with self-signed certs
+# setup for lab environment
+openshift_docker_hosted_registry_insecure=true
+
+###########################################################################
+### OpenShift Master Vars
+###########################################################################
+
+openshift_master_api_port=8443
+openshift_master_console_port=8443
+
+#Default:  openshift_master_cluster_method=native
+# Internal cluster name
+openshift_master_cluster_hostname=ocp.example.com
+
+# NOTE: Default wildcard domain for applications
+openshift_master_default_subdomain=apps.ocp.example.com
+
+###########################################################################
+### OpenShift Network Vars
+###########################################################################
+# Defaults
+osm_cluster_network_cidr=10.1.0.0/16
+openshift_portal_net=172.30.0.0/16
+
+os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
+
+###########################################################################
+### OpenShift Authentication Vars
+###########################################################################
+
+# htpasswd Authentication(Non-Priviledge UI User until formal identity provider is used. For now htpasswd identity provider)
+# NOTE: read initial identities in htpasswd format from /root/htpasswd.openshift
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
+
+# Using an external htpasswd file use this:
+#openshift_master_htpasswd_file=/home/cloud-user/htpasswd.openshift
+# Embedding users in the configuration file use this syntax
+# Note: user==password for this example
+openshift_master_htpasswd_users={'ocpadmin':'$apr1$ZuJlQr.Y$6abuePAhKG0iY8QDNWoq80','developer':'$apr1$QE2hKzLx$4ZeptR1hHNP538zRh/Pew.'}
+
+###########################################################################
+### OpenShift Metrics and Logging Vars
+###########################################################################
+
+#########################
+# Prometheus Cluster Monitoring
+#########################
+# https://github.com/openshift/openshift-docs/blob/master/install_config/monitoring/configuring-openshift-cluster-monitoring.adoc
+# https://github.com/openshift/openshift-docs/tree/enterprise-3.11/install_config/monitoring
+
+openshift_cluster_monitoring_operator_install=true
+#openshift_prometheus_node_selector={"node-role.kubernetes.io/infra":"true"}
+
+# NOTE: Setup for lab environment
+# Enable persistent storage of Prometheus time-series data (default false)
+openshift_cluster_monitoring_operator_prometheus_storage_enabled=false
+# Enable persistent storage of Alertmanager notifications (default false)
+openshift_cluster_monitoring_operator_alertmanager_storage_enabled=false
+
+########################
+# Cluster Metrics
+########################
+# https://github.com/openshift/openshift-docs/blob/enterprise-3.11/install_config/cluster_metrics.adoc
+
+openshift_metrics_install_metrics=true
+
+# Store Metrics for 1 days
+openshift_metrics_duration=1
+
+openshift_metrics_storage_kind=nfs
+openshift_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_metrics_storage_nfs_directory=/srv/nfs
+openshift_metrics_storage_nfs_options='*(rw,root_squash)'
+openshift_metrics_storage_volume_name=metrics
+openshift_metrics_storage_volume_size=10Gi
+openshift_metrics_storage_labels={'storage': 'metrics'}
+
+# cassandra -- ephemeral storage (for testing)
+openshift_metrics_cassandra_storage_type=emptydir
+openshift_metrics_cassandra_replicas=1
+openshift_metrics_cassandra_limits_memory=2Gi
+openshift_metrics_cassandra_limits_cpu=800m
+openshift_metrics_cassandra_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+# hawkular
+openshift_metrics_hawkular_limits_memory=2Gi
+openshift_metrics_hawkular_limits_cpu=800m
+openshift_metrics_hawkular_replicas=1
+openshift_metrics_hawkular_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+# heapster
+openshift_metrics_heapster_limits_memory=2Gi
+openshift_metrics_heapster_limits_cpu=800m
+openshift_metrics_heapster_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+########################
+# Cluster Logging
+########################
+# https://github.com/openshift/openshift-docs/blob/enterprise-3.11/install_config/aggregate_logging.adoc
+
+# install logging
+openshift_logging_install_logging=true
+
+# logging curator
+openshift_logging_curator_default_days=1
+openshift_logging_curator_cpu_limit=500m
+openshift_logging_curator_memory_limit=1Gi
+openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+# Configure a second ES+Kibana cluster for operations logs
+# Fluend splits the logs accordingly
+openshift_logging_use_ops=false
+
+# Fluentd
+openshift_logging_fluentd_cpu_limit=500m
+openshift_logging_fluentd_memory_limit=1Gi
+# collect audit.log to ES
+openshift_logging_fluentd_audit_container_engine=false
+
+# persistent storage for logs
+openshift_logging_storage_kind=nfs
+openshift_logging_storage_access_modes=['ReadWriteOnce']
+openshift_logging_storage_nfs_directory=/srv/nfs
+openshift_logging_storage_nfs_options='*(rw,root_squash)'
+openshift_logging_storage_volume_name=logging
+openshift_logging_storage_volume_size=10Gi
+openshift_logging_storage_labels={'storage': 'logging'}
+
+# eventrouter
+openshift_logging_install_eventrouter=true
+openshift_logging_eventrouter_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+# Elasticsearch (ES)
+# ES cluster size (HA ES >= 3)
+openshift_logging_es_cluster_size=1
+# replicas per shard
+#openshift_logging_es_number_of_replicas=1
+# shards per index
+#openshift_logging_es_number_of_shards=1
+openshift_logging_es_cpu_limit=500m
+openshift_logging_es_memory_limit=1Gi
+# PVC size omitted == ephemeral vols are used
+#openshift_logging_es_pvc_siz=10G
+openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+# Kibana
+openshift_logging_kibana_cpu_limit=500m
+openshift_logging_kibana_memory_limit=1Gi
+openshift_logging_kibana_replica_count=1
+# expose ES? (default false)
+openshift_logging_es_allow_external=false
+openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra": "true"}
+
+###########################################################################
+### OpenShift Router and Registry Vars
+###########################################################################
+
+# NOTE: Qty should NOT exceed the number of infra nodes
+openshift_hosted_router_replicas=1
+
+# openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
+
+openshift_hosted_registry_replicas=1
+openshift_hosted_registry_pullthrough=true
+openshift_hosted_registry_acceptschema2=true
+openshift_hosted_registry_enforcequota=true
+
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_nfs_directory=/srv/nfs
+openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
+openshift_hosted_registry_storage_volume_name=registry
+openshift_hosted_registry_storage_volume_size=10Gi
+openshift_hosted_registry_selector="node-role.kubernetes.io/infra=true"
+
+###########################################################################
+### OpenShift Service Catalog Vars
+###########################################################################
+
+# default=true
+openshift_enable_service_catalog=true
+
+# default=true
+template_service_broker_install=true
+openshift_template_service_broker_namespaces=['openshift']
+
+# default=true
+ansible_service_broker_install=true
+ansible_service_broker_local_registry_whitelist=['.*-apb$']
+
+###########################################################################
+### OpenShift Cockpit Vars and plugins
+###########################################################################
+
+# Disable cockpit
+osm_use_cockpit=false
+
+###########################################################################
+### OpenShift Hosts
+###########################################################################
+[OSEv3:children]
+nfs
+masters
+etcd
+nodes
+
+[nfs]
+ocp.example.com 
+
+[masters]
+ocp.example.com
+
+[etcd]
+ocp.example.com
+
+[nodes]
+## All-In-One with CRI-O
+#ocp.example.com openshift_node_group_name='node-config-all-in-one-crio' openshift_node_problem_detector_install=true
+ocp.example.com openshift_node_group_name='node-config-all-in-one' openshift_node_problem_detector_install=true
+
+#
+# END OF FILE
+#
