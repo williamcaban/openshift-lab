@@ -29,8 +29,8 @@ openshift_release=3.11.98
 # Deploy Operator Lifecycle Manager (OLM)
 openshift_enable_olm=true
 
-# Using firewalld is recommended for new installations (default is iptables)
-os_firewall_use_firewalld=true
+# firewalld recommended for new installations (default is iptables)
+#os_firewall_use_firewalld=true
 
 ###########################################################################
 ### OpenShift Registries Locations
@@ -178,10 +178,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # To define initial users directly in the inventory file:
 # Note: user==password for this example
-#openshift_master_htpasswd_users={'ocpadmin':'$apr1$ZuJlQr.Y$6abuePAhKG0iY8QDNWoq80','developer':'$apr1$QE2hKzLx$4ZeptR1hHNP538zRh/Pew.'}
+openshift_master_htpasswd_users={'ocpadmin':'$apr1$ZuJlQr.Y$6abuePAhKG0iY8QDNWoq80','developer':'$apr1$QE2hKzLx$4ZeptR1hHNP538zRh/Pew.'}
 
 # To use external htpassword file:
-openshift_master_htpasswd_file=/root/htpasswd.openshift
+#openshift_master_htpasswd_file=/root/htpasswd.openshift
 
 ###########################################################################
 ### OpenShift Cluster Monitoring, Metrics and Logging Vars
@@ -206,8 +206,8 @@ openshift_cluster_monitoring_operator_alertmanager_storage_enabled=true
 
 # Storage class to use if persistent storage enabled
 # NOTE: it will use storageclass default if storage class not specified
-openshift_cluster_monitoring_operator_prometheus_storage_class_name='glusterfs-storage-block'
-openshift_cluster_monitoring_operator_alertmanager_storage_class_name='glusterfs-storage-block'
+#openshift_cluster_monitoring_operator_prometheus_storage_class_name='glusterfs-storage-block'
+#openshift_cluster_monitoring_operator_alertmanager_storage_class_name='glusterfs-storage-block'
 
 # For custom config Alertmanager
 # https://docs.openshift.com/container-platform/3.11/install_config/prometheus_cluster_monitoring.html#configuring-alertmanager
@@ -236,8 +236,8 @@ openshift_metrics_cassandra_limits_memory=2Gi
 openshift_metrics_cassandra_limits_cpu=1000m
 
 # User gluster-block or glusterfs (dynamic)
-openshift_metrics_cassandra_pvc_storage_class_name='glusterfs-storage-block'
-#openshift_metrics_cassandra_storage_type=dynamic
+#openshift_metrics_cassandra_pvc_storage_class_name='glusterfs-storage-block'
+openshift_metrics_cassandra_storage_type=dynamic
 
 ########################
 # Cluster Logging
@@ -248,7 +248,7 @@ openshift_logging_install_eventrouter=true
 
 openshift_logging_es_pvc_dynamic=true
 openshift_logging_es_pvc_size=20Gi
-openshift_logging_es_pvc_storage_class_name='glusterfs-storage-block'
+#openshift_logging_es_pvc_storage_class_name='glusterfs-storage-block'
 
 openshift_logging_es_memory_limit=4Gi
 openshift_logging_es_cluster_size=1
@@ -272,8 +272,8 @@ openshift_logging_eventrouter_nodeselector={"node-role.kubernetes.io/infra": "tr
 openshift_router_selector='node-role.kubernetes.io/infra=true'
 openshift_registry_selector='node-role.kubernetes.io/infra=true'
 
-# NOTE: Qty should NOT exceed the number of infra nodes
-openshift_hosted_router_replicas=2
+# NOTE: Qty should match number of infra nodes
+openshift_hosted_router_replicas=3
 
 openshift_hosted_registry_replicas=1
 openshift_hosted_registry_pullthrough=true
