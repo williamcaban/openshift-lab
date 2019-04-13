@@ -1,0 +1,21 @@
+---
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+  register: result
+  until: result is succeeded
+
+- when:
+  - result.changed
+  block:
+  - shell: "sleep 2 && reboot"
+    async: 1
+    poll: 0
+
+  - name: wait for the system to reboot
+    wait_for_connection:
+      connection_timeout: 20
+      sleep: 5
+      delay: 5
+      timeout: 60
