@@ -15,7 +15,7 @@ https://docs.openshift.com/container-platform/3.11/install/configuring_inventory
 
 # ENVIRONMENT REQUIREMENTS
 1. Ensure DNS resolution of all nodes FQDN
-2. Register the FQDN for the cluster consoles like osp-console.example.com (``openshift_master_cluster_hostname``)
+2. Register the FQDN for the cluster consoles like ocp-console.example.com (``openshift_master_cluster_hostname``)
 3. Register the wildcard subdomain for the apps like *.apps.example.com (``openshift_master_default_subdomain``)
 4. Ensure SELinux in ``enforcing`` mode
 
