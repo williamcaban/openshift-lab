@@ -1,5 +1,5 @@
 #
-# ansible inventory for OpenShift Container Platform  3.11.82
+# ansible inventory for OpenShift Container Platform  3.11.98
 #
 
 ###########################################################################
@@ -48,7 +48,7 @@ openshift_deployment_type=openshift-enterprise
 openshift_disable_check="disk_availability,memory_availability"
 
 # OpenShift Version(Always use sub-release for smoother upgrades):
-openshift_release=3.11.82
+openshift_release=3.11.98
 
 # Deploy Operator Lifecycle Manager (Tech Preview)
 openshift_enable_olm=true
@@ -102,8 +102,8 @@ openshift_master_default_subdomain=apps.ocp.example.com
 ### OpenShift Network Vars
 ###########################################################################
 # Defaults
-osm_cluster_network_cidr=10.1.0.0/16
-openshift_portal_net=172.30.0.0/16
+#osm_cluster_network_cidr=10.1.0.0/16
+#openshift_portal_net=172.30.0.0/16
 
 os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
 
@@ -117,7 +117,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Using an external htpasswd file use this:
 #openshift_master_htpasswd_file=/home/cloud-user/htpasswd.openshift
-# Embedding users in the configuration file use this syntax
+# For embeddng the initial users in the configuration file use this syntax
 # Note: user==password for this example
 openshift_master_htpasswd_users={'ocpadmin':'$apr1$ZuJlQr.Y$6abuePAhKG0iY8QDNWoq80','developer':'$apr1$QE2hKzLx$4ZeptR1hHNP538zRh/Pew.'}
 

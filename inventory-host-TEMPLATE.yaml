@@ -74,13 +74,13 @@ openshift_storage_glusterfs_storageclass=true
 openshift_storage_glusterfs_storageclass_default=true
 
 # Enable Glusterfs Block Storageclass
-openshift_storage_glusterfs_block_deploy=true
-openshift_storage_glusterfs_block_host_vol_create=true
+openshift_storage_glusterfs_block_deploy=false
+#openshift_storage_glusterfs_block_host_vol_create=true
 # NOTE: host_vol_size is effectively an upper limit on the size of glusterblock volumes 
 # unless you manually create larger GlusterFS block-hosting volumes
-openshift_storage_glusterfs_block_host_vol_size=100
-openshift_storage_glusterfs_block_storageclass=true
-openshift_storage_glusterfs_block_storageclass_default=false
+#openshift_storage_glusterfs_block_host_vol_size=100
+#openshift_storage_glusterfs_block_storageclass=true
+#openshift_storage_glusterfs_block_storageclass_default=false
 
 #
 # Enable Glusterfs S3 (Tech Preview)
