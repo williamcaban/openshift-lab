@@ -64,7 +64,7 @@ openshift_master_dynamic_provisioning_enabled=true
 ###########################################################################
 ### OpenShift Container Storage (OCS)
 ###########################################################################
-# https://github.com/openshift/openshift-ansible/tree/release-3.11/roles/openshift_storage_glusterfs
+# https://github.com/openshift/openshift-ansible/tree/release-3.11/roles/openshift_storage_glusterfs#role-variables
 
 # Deploy OCS glusterfs and create StorageClass
 # Note: default namespace = glusterfs
@@ -72,6 +72,10 @@ openshift_master_dynamic_provisioning_enabled=true
 
 openshift_storage_glusterfs_storageclass=true
 openshift_storage_glusterfs_storageclass_default=true
+
+# Increase timeout for Pods to be ready (default=300) to
+# prevent installation failure on slow or oversubscribed Nodes
+openshift_storage_glusterfs_timeout=600
 
 # Enable Glusterfs Block Storageclass
 openshift_storage_glusterfs_block_deploy=false
