@@ -1,5 +1,5 @@
 # ABOUT THIS REPO
-This repository is a **prescriptive** OpenShift _inventory_ file I use for my lab environment and some notes on the installation process. The inventory file is verbose to allow for quick adjustment during tests. 
+This repository is a **prescriptive** OpenShift _inventory_ file I for my lab environment and some notes on the installation process. The inventory file is verbose to allow for quick adjustment during tests. 
 
 To customize the inventory file to your environment you may reference the official OpenShift documentation:
 
